@@ -7,11 +7,12 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // ✅ Oculta el splash screen al cargar
     const hideSplash = async () => {
       try {
         await SplashScreen.hide();
       } catch (e) {
-        console.log("Splash no listo en web");
+        console.log("Splash no listo");
       }
     };
     hideSplash();
@@ -19,9 +20,13 @@ export default function LoginPage() {
 
   const handleLogin = () => {
     if (name.length < 2) return alert("¡Escribe tu nombre, bro!");
+    
+    // Guardamos el nombre en el navegador/móvil
     localStorage.setItem('userName', name);
-    // ✅ Ruta fija para entrar a la Home en Capacitor
-    router.push('/index.html'); 
+    
+    // ✅ SOLUCIÓN AL 404: 
+    // En Next.js usamos '/' para ir al index, NUNCA '.html'
+    router.push('/'); 
   };
 
   return (
@@ -45,7 +50,7 @@ export default function LoginPage() {
         width: '100%' 
       }}>
         <h1 style={{ fontSize: '28px', color: '#00d1ff', marginBottom: '10px' }}>Post-it ✨</h1>
-        <p style={{ color: '#65676b', marginBottom: '30px' }}>Conecta con los tuyos de forma divertida.</p>
+        <p style={{ color: '#65676b', marginBottom: '30px' }}>Conecta con los tuyos.</p>
         
         <input 
           type="text" 
@@ -75,7 +80,6 @@ export default function LoginPage() {
             color: '#fff', 
             fontWeight: 'bold', 
             fontSize: '16px', 
-            cursor: 'pointer', 
             boxShadow: '0 4px 12px rgba(0,209,255,0.3)' 
           }}
         >
