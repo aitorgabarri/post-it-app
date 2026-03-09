@@ -10,7 +10,6 @@ export default function SendPage() {
   const [tipo, setTipo] = useState('');
   const router = useRouter();
 
-  // ✅ NUEVO: Pedir permisos nada más cargar la página
   useEffect(() => {
     const requestPerms = async () => {
       const check = await LocalNotifications.checkPermissions();
@@ -39,6 +38,12 @@ export default function SendPage() {
       hour: '2-digit', 
       minute: '2-digit' 
     });
+
+    // ✅ MENSAJE DE ACEPTACIÓN RECUPERADO
+    const mensajeConfirmacion = `${localStorage.getItem('userName')} le ha enviado un posit a la hora ${horaFormateada}. ¿Quiere aceptarlo?`;
+    const quiereAceptar = window.confirm(mensajeConfirmacion);
+
+    if (!quiereAceptar) return; // Si cancela, no hacemos nada
 
     // 2. Insertamos en Supabase
     const { error } = await supabase.from('reminders').insert([{

@@ -51,9 +51,6 @@ export default function RecordVideoPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            
-            {/* ✅ MEJORA: Usamos una etiqueta <label> en lugar de document.getElementById.click() */}
-            {/* Esto es mucho más compatible con Android y Capacitor */}
             <label 
               htmlFor="cameraInput"
               style={{ padding: '20px', background: '#00d1ff', color: '#fff', borderRadius: '20px', fontWeight: 'bold', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer' }}
@@ -69,7 +66,8 @@ export default function RecordVideoPage() {
             </label>
 
             <input 
-              type="file" id="cameraInput" accept="video/*" capture="environment" 
+              type="file" id="cameraInput" accept="video/*" 
+              capture={"camera" as any} // ✅ Esto arregla el error de la imagen 060522
               style={{ display: 'none' }} onChange={handleFileChange} 
             />
             <input 
@@ -89,10 +87,7 @@ export default function RecordVideoPage() {
         </button>
       )}
 
-      <button 
-        onClick={() => router.push('/')}
-        style={{ marginTop: '25px', background: 'none', border: 'none', color: '#888', fontSize: '14px' }}
-      >
+      <button onClick={() => router.push('/')} style={{ marginTop: '25px', background: 'none', border: 'none', color: '#888', fontSize: '14px' }}>
         ← Volver al tablón
       </button>
     </div>
