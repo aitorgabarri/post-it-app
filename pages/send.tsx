@@ -10,7 +10,16 @@ export default function SendPage() {
   const [tipo, setTipo] = useState('');
   const router = useRouter();
 
+  // ✅ NUEVO: Pedir permisos nada más cargar la página
   useEffect(() => {
+    const requestPerms = async () => {
+      const check = await LocalNotifications.checkPermissions();
+      if (check.display !== 'granted') {
+        await LocalNotifications.requestPermissions();
+      }
+    };
+    requestPerms();
+
     const msg = localStorage.getItem('currentPostIt');
     const type = localStorage.getItem('postItType');
     if (!msg) { 
@@ -37,7 +46,6 @@ export default function SendPage() {
       receiver_name: receptorLimpio,
       video_url: mensaje, 
       scheduled_for: fechaSeleccionada.toISOString(),
-      // ✅ IMPORTANTE: Estado 'accepted' para que aparezca en el tablón
       status: 'accepted', 
       color: tipo === 'video' ? '#e7f3ff' : '#fffbe6'
     }]);
@@ -59,7 +67,7 @@ export default function SendPage() {
       }
       
       localStorage.removeItem('currentPostIt');
-      alert(`¡Enviado! El posit para ${receptorLimpio} aparecerá a las ${horaFormateada} 🚀`);
+      alert(`¡Enviado! El posit para ${receptorLimpio} saltará a las ${horaFormateada} 🚀`);
       router.push('/');
     } else {
       alert("Error al conectar con Supabase, bro");

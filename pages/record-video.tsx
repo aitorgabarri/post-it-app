@@ -51,23 +51,23 @@ export default function RecordVideoPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {/* BOTÓN CÁMARA */}
-            <button 
-              onClick={() => document.getElementById('cameraInput')?.click()}
-              style={{ padding: '20px', background: '#00d1ff', color: '#fff', border: 'none', borderRadius: '20px', fontWeight: 'bold', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+            
+            {/* ✅ MEJORA: Usamos una etiqueta <label> en lugar de document.getElementById.click() */}
+            {/* Esto es mucho más compatible con Android y Capacitor */}
+            <label 
+              htmlFor="cameraInput"
+              style={{ padding: '20px', background: '#00d1ff', color: '#fff', borderRadius: '20px', fontWeight: 'bold', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer' }}
             >
               📸 Abrir Cámara
-            </button>
+            </label>
 
-            {/* BOTÓN GALERÍA */}
-            <button 
-              onClick={() => document.getElementById('galleryInput')?.click()}
-              style={{ padding: '20px', background: '#fff', color: '#00d1ff', border: '2px solid #00d1ff', borderRadius: '20px', fontWeight: 'bold', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+            <label 
+              htmlFor="galleryInput"
+              style={{ padding: '20px', background: '#fff', color: '#00d1ff', border: '2px solid #00d1ff', borderRadius: '20px', fontWeight: 'bold', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer' }}
             >
               📁 Elegir de Galería
-            </button>
+            </label>
 
-            {/* Inputs ocultos */}
             <input 
               type="file" id="cameraInput" accept="video/*" capture="environment" 
               style={{ display: 'none' }} onChange={handleFileChange} 
@@ -83,7 +83,7 @@ export default function RecordVideoPage() {
       {videoURL && (
         <button 
           onClick={() => router.push('/send')} 
-          style={{ width: '100%', padding: '18px', background: '#00d1ff', color: '#fff', border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '18px', boxShadow: '0 5px 15px rgba(0,209,255,0.3)' }}
+          style={{ width: '100%', padding: '18px', background: '#00d1ff', color: '#fff', border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '18px' }}
         >
           Siguiente →
         </button>
@@ -91,7 +91,7 @@ export default function RecordVideoPage() {
 
       <button 
         onClick={() => router.push('/')}
-        style={{ marginTop: '25px', background: 'none', border: 'none', color: '#888', textDecoration: 'none', fontSize: '14px' }}
+        style={{ marginTop: '25px', background: 'none', border: 'none', color: '#888', fontSize: '14px' }}
       >
         ← Volver al tablón
       </button>
