@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  distDir: 'out',
-  assetPrefix: './', 
-  // ✅ CAMBIO CLAVE: Ponemos esto en false para evitar subcarpetas raras
+  // ✅ Eliminamos distDir porque 'out' es el valor por defecto
+  // ✅ ELIMINAMOS assetPrefix porque rompe las rutas en Vercel
   trailingSlash: false, 
   images: {
     unoptimized: true, 
@@ -11,8 +10,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, 
   },
-  // Forzamos a que no cree carpetas para las rutas
-  skipTrailingSlashRedirect: true,
+  // ✅ Esto ayuda a que Capacitor y Vercel se lleven bien
+  swcMinify: true,
 }
 
 module.exports = nextConfig
