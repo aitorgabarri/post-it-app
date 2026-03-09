@@ -22,9 +22,9 @@ export default function SendPage() {
   }, [router]);
 
   const handleEnviar = async () => {
-    if (!receptor || !fecha) return alert("Faltan datos, bro");
+    const receptorLimpio = receptor.trim();
+    if (!receptorLimpio || !fecha) return alert("Faltan datos, bro");
 
-    // 1. Extraemos y formateamos la hora elegida (ej: "15:30")
     const fechaSeleccionada = new Date(fecha);
     const horaFormateada = fechaSeleccionada.toLocaleTimeString([], { 
       hour: '2-digit', 
@@ -34,24 +34,23 @@ export default function SendPage() {
     // 2. Insertamos en Supabase
     const { error } = await supabase.from('reminders').insert([{
       sender_name: localStorage.getItem('userName'),
-      receiver_name: receptor,
-      video_url: mensaje, // Aquí va el texto o la URL del video
+      receiver_name: receptorLimpio,
+      video_url: mensaje, 
       scheduled_for: fechaSeleccionada.toISOString(),
-      status: 'pending',
+      // ✅ IMPORTANTE: Estado 'accepted' para que aparezca en el tablón
+      status: 'accepted', 
       color: tipo === 'video' ? '#e7f3ff' : '#fffbe6'
     }]);
 
     if (!error) {
       try {
-        // 3. Programamos la notificación local con la hora en el texto
+        // 3. Programamos la notificación local
         await LocalNotifications.schedule({
           notifications: [{
             title: "⏰ ¡HORA DEL POSIT!",
-            // ✅ El mensaje ahora incluye la hora de llegada
             body: `Tienes un ${tipo === 'video' ? 'video' : 'posit'} de ${localStorage.getItem('userName')} a las ${horaFormateada}`,
             id: Math.floor(Date.now() / 1000),
             schedule: { at: fechaSeleccionada },
-            sound: 'llamada.wav', // Debe estar en res/raw/llamada.wav
             actionTypeId: 'OPEN_APP'
           }]
         });
@@ -60,7 +59,7 @@ export default function SendPage() {
       }
       
       localStorage.removeItem('currentPostIt');
-      alert(`¡Enviado! El posit para ${receptor} saltará a las ${horaFormateada} 🚀`);
+      alert(`¡Enviado! El posit para ${receptorLimpio} aparecerá a las ${horaFormateada} 🚀`);
       router.push('/');
     } else {
       alert("Error al conectar con Supabase, bro");
@@ -76,6 +75,7 @@ export default function SendPage() {
         <input 
           type="text" 
           placeholder="Nombre del receptor (ej: Aitor)" 
+          value={receptor}
           onChange={e => setReceptor(e.target.value)} 
           style={{ width: '100%', padding: '15px', marginBottom: '20px', borderRadius: '10px', border: '1px solid #ddd', boxSizing: 'border-box' }} 
         />
@@ -83,6 +83,7 @@ export default function SendPage() {
         <p style={{ fontWeight: 'bold', color: '#666' }}>¿A qué hora debe llegar?</p>
         <input 
           type="datetime-local" 
+          value={fecha}
           onChange={e => setFecha(e.target.value)} 
           style={{ width: '100%', padding: '15px', marginBottom: '30px', borderRadius: '10px', border: '1px solid #ddd', boxSizing: 'border-box' }} 
         />
@@ -96,7 +97,7 @@ export default function SendPage() {
 
         <button 
           onClick={() => router.push('/')}
-          style={{ width: '100%', marginTop: '15px', background: 'none', border: 'none', color: '#888', textDecoration: 'underline' }}
+          style={{ width: '100%', marginTop: '15px', background: 'none', border: 'none', color: '#888', textDecoration: 'underline', cursor: 'pointer' }}
         >
           Volver atrás
         </button>
