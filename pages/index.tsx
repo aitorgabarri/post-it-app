@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useRouter } from 'next/router'; 
 import Link from 'next/link';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { Camera } from '@capacitor/camera'; // ✅ Necesario para pedir el permiso
 import { SplashScreen } from '@capacitor/splash-screen';
 
 export default function HomePage() {
@@ -13,17 +14,27 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
 
-  // 🛠️ CORRECCIÓN: Ruta limpia sin .html
+  // 🔔 NUEVO: Función para que el móvil pregunte permisos al abrir
+  const pedirPermisos = async () => {
+    try {
+      await LocalNotifications.requestPermissions();
+      await Camera.requestPermissions();
+    } catch (e) {
+      console.log("Error al pedir permisos iniciales", e);
+    }
+  };
+
+  // 🛠️ TU CÓDIGO: Ruta limpia sin .html
   const handleLogout = useCallback(() => {
     localStorage.removeItem('userName');
     router.push('/login'); 
   }, [router]);
 
-  // 🗑️ NUEVO: Función para borrar post-its de Supabase
+  // 🗑️ TU CÓDIGO: Función para borrar post-its
   const deletePostIt = async (id: number) => {
     const { error } = await supabase.from('reminders').delete().eq('id', id);
     if (!error) {
-      fetchData(); // Refresca la lista
+      fetchData(); 
     } else {
       alert("Error al borrar: " + error.message);
     }
@@ -49,8 +60,11 @@ export default function HomePage() {
     setIsMounted(true);
     const savedUser = localStorage.getItem('userName');
     if (isMounted) {
+      // ✅ LANZAMOS LA PETICIÓN AQUÍ (Sin tocar tu lógica de login)
+      pedirPermisos();
+
       if (!savedUser) { 
-        router.push('/login'); // 🛠️ CORRECCIÓN: Ruta limpia
+        router.push('/login'); 
       } else { 
         setUser(savedUser); 
         fetchData(); 
@@ -86,7 +100,6 @@ export default function HomePage() {
 
       {showOptions && (
         <div style={{ position: 'fixed', bottom: '25px', left: '20px', right: '20px', display: 'flex', gap: '15px' }}>
-          {/* 🛠️ CORRECCIÓN: Rutas limpias sin .html */}
           <Link href="/record"><a style={{ flex: 1, background: '#fff', padding: '18px', borderRadius: '15px', textAlign: 'center', textDecoration: 'none', color: '#000', fontWeight: 'bold' }}>✍️ Texto</a></Link>
           <Link href="/record-video"><a style={{ flex: 1, background: '#fff', padding: '18px', borderRadius: '15px', textAlign: 'center', textDecoration: 'none', color: '#000', fontWeight: 'bold' }}>🎥 Video</a></Link>
         </div>
