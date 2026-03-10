@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase'; 
 import { useRouter } from 'next/router'; 
 import Link from 'next/link';
-import { LocalNotifications } from '@capacitor/local-notifications';
-import { Camera } from '@capacitor/camera'; // ✅ Necesario para pedir el permiso
+import OneSignal from 'onesignal-cordova-plugin'; // ✅ Plugin de OneSignal
+import { Camera } from '@capacitor/camera'; 
 import { SplashScreen } from '@capacitor/splash-screen';
 
 export default function HomePage() {
@@ -14,23 +14,40 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
 
-  // 🔔 NUEVO: Función para que el móvil pregunte permisos al abrir
-  const pedirPermisos = async () => {
+  // 🔔 CONFIGURACIÓN ONESIGNAL: Pide permisos y registra al usuario
+  const setupOneSignal = async () => {
     try {
-      await LocalNotifications.requestPermissions();
+      // 1. Pedir permiso de cámara para que esté lista al grabar
       await Camera.requestPermissions();
+
+      // 2. Solo inicializamos si estamos en el dispositivo móvil (APK)
+      if (typeof window !== 'undefined' && (window as any).cordova) {
+        
+        // Inicializar con tu ID real de OneSignal
+        OneSignal.initialize("f8e1e63e-151d-4f01-96ad-3d00c5f25ec8");
+
+        // ✅ VINCULACIÓN: Registramos el móvil con el nombre del usuario de Supabase
+        const userName = localStorage.getItem('userName');
+        if (userName) {
+          OneSignal.login(userName); 
+          console.log("Dispositivo vinculado al usuario:", userName);
+        }
+
+        // Lanza el diálogo nativo de Android de "Permitir notificaciones"
+        OneSignal.Notifications.requestPermission(true).then((accepted) => {
+          console.log("¿Notificaciones OneSignal aceptadas?: " + accepted);
+        });
+      }
     } catch (e) {
-      console.log("Error al pedir permisos iniciales", e);
+      console.log("Error al inicializar servicios nativos", e);
     }
   };
 
-  // 🛠️ TU CÓDIGO: Ruta limpia sin .html
   const handleLogout = useCallback(() => {
     localStorage.removeItem('userName');
     router.push('/login'); 
   }, [router]);
 
-  // 🗑️ TU CÓDIGO: Función para borrar post-its
   const deletePostIt = async (id: number) => {
     const { error } = await supabase.from('reminders').delete().eq('id', id);
     if (!error) {
@@ -59,9 +76,10 @@ export default function HomePage() {
   useEffect(() => {
     setIsMounted(true);
     const savedUser = localStorage.getItem('userName');
+    
     if (isMounted) {
-      // ✅ LANZAMOS LA PETICIÓN AQUÍ (Sin tocar tu lógica de login)
-      pedirPermisos();
+      // ✅ LANZAMOS ONESIGNAL Y CÁMARA AQUÍ NADA MÁS ENTRAR
+      setupOneSignal();
 
       if (!savedUser) { 
         router.push('/login'); 
@@ -87,21 +105,33 @@ export default function HomePage() {
       </header>
 
       <div style={{ display: 'grid', gap: '15px' }}>
-        {reminders.map(r => (
-          <div key={r.id} style={{ background: r.color || '#fffbe6', padding: '20px', borderRadius: '15px', position: 'relative' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-               <p style={{ fontSize: '10px', fontWeight: 'bold' }}>DE: {r.sender_name}</p>
-               <button onClick={() => deletePostIt(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>🗑️</button>
+        {reminders.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#999', marginTop: '50px' }}>No hay posit todavía... 😴</p>
+        ) : (
+          reminders.map(r => (
+            <div key={r.id} style={{ background: r.color || '#fffbe6', padding: '20px', borderRadius: '15px', position: 'relative', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                 <p style={{ fontSize: '10px', fontWeight: 'bold', margin: 0 }}>DE: {r.sender_name}</p>
+                 <button onClick={() => deletePostIt(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>🗑️</button>
+              </div>
+              {r.video_url?.startsWith('http') ? (
+                <video src={r.video_url} controls style={{ width: '100%', borderRadius: '10px' }} />
+              ) : (
+                <p style={{ margin: 0, fontSize: '16px' }}>{r.video_url}</p>
+              )}
             </div>
-            {r.video_url?.startsWith('http') ? <video src={r.video_url} controls style={{ width: '100%', borderRadius: '10px' }} /> : <p>{r.video_url}</p>}
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {showOptions && (
-        <div style={{ position: 'fixed', bottom: '25px', left: '20px', right: '20px', display: 'flex', gap: '15px' }}>
-          <Link href="/record"><a style={{ flex: 1, background: '#fff', padding: '18px', borderRadius: '15px', textAlign: 'center', textDecoration: 'none', color: '#000', fontWeight: 'bold' }}>✍️ Texto</a></Link>
-          <Link href="/record-video"><a style={{ flex: 1, background: '#fff', padding: '18px', borderRadius: '15px', textAlign: 'center', textDecoration: 'none', color: '#000', fontWeight: 'bold' }}>🎥 Video</a></Link>
+        <div style={{ position: 'fixed', bottom: '25px', left: '20px', right: '20px', display: 'flex', gap: '15px', zIndex: 100 }}>
+          <Link href="/record">
+            <a style={{ flex: 1, background: '#fff', padding: '18px', borderRadius: '15px', textAlign: 'center', textDecoration: 'none', color: '#000', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>✍️ Texto</a>
+          </Link>
+          <Link href="/record-video">
+            <a style={{ flex: 1, background: '#fff', padding: '18px', borderRadius: '15px', textAlign: 'center', textDecoration: 'none', color: '#000', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>🎥 Video</a>
+          </Link>
         </div>
       )}
     </main>

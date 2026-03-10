@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "125357268920",
+    "project_id": "posit-584ab",
+    "storage_bucket": "posit-584ab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125357268920:android:4338c8a2153bc6a597b94d",
+        "android_client_info": {
+          "package_name": "com.mycompany.posit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLl1kVSsEnYzj8xQbMVH7HDsG2e4ivlPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
