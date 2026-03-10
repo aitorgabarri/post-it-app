@@ -1,15 +1,24 @@
 apply plugin: 'com.android.application'
+// ✅ AÑADIDO: Este plugin activa Firebase en la APK
+apply plugin: 'com.google.gms.google-services' 
 
 android {
-    namespace "com.tuapp.posit"
+    // ✅ CORREGIDO: Ahora coincide con tu google-services.json
+    namespace "com.mycompany.posit" 
     compileSdk 36
 
     defaultConfig {
-        applicationId "com.tuapp.posit"
+        // ✅ CORREGIDO: Ahora coincide con tu google-services.json
+        applicationId "com.mycompany.posit" 
         minSdk 24
         targetSdk 36
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Capacitor lo necesita para las assets
+             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
     }
 
     buildTypes {
@@ -19,7 +28,6 @@ android {
         }
     }
 
-    // Esto corrige el error de "Java version 8 is obsolete"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -28,14 +36,15 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    // Estas son las piezas que le faltaban a tu MainActivity.java
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
+    
+    // ✅ AÑADIDO: La librería de OneSignal para que la APK "escuche"
+    implementation "com.onesignal:OneSignal:[4.8.5, 4.99.99]"
 
     implementation project(':capacitor-android')
     implementation project(':capacitor-cordova-android-plugins')
 }
 
-// Seguimos ignorando este archivo para evitar errores
-// apply from: 'capacitor.build.gradle'
+// ✅ IMPORTANTE: Descomenta esto para que Capacitor cargue sus plugins
+apply from: 'capacitor.build.gradle'
