@@ -1,7 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.tuapp.posit',
+  // ✅ CORREGIDO: Ahora coincide con el "package_name" de tu google-services.json
+  appId: 'com.mycompany.posit', 
   appName: 'Post-it',
   webDir: 'out',
   server: {
@@ -9,14 +10,14 @@ const config: CapacitorConfig = {
     cleartext: true,
     androidScheme: 'https'
   },
-  // ✅ AÑADIMOS ESTO: Sin este bloque, las notificaciones locales no despiertan a la APK
+  // 🔔 CONFIGURACIÓN DE PLUGINS
   plugins: {
     LocalNotifications: {
       smallIcon: "ic_stat_icon_config_sample",
       iconColor: "#00d1ff",
       sound: "beep.wav",
     },
-    // También configuramos la cámara para que sea más agresiva
+    // Configuración de permisos para que la cámara no dé guerra
     Camera: {
       permissions: ["camera", "photos"]
     }
