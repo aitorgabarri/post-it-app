@@ -1,7 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">posit-app</string>
-    <string name="title_activity_main">posit-app</string>
+    <string name="app_name">Post-it</string>
+    <string name="title_activity_main">Post-it</string>
     <string name="package_name">com.tuapp.posit</string>
     <string name="custom_url_scheme">com.tuapp.posit</string>
+
+    <string name="camera_usage_description">Necesitamos usar tu cámara para grabar los vídeos de tus post-its.</string>
+    <string name="photo_library_usage_description">Necesitamos acceder a tu galería para que elijas vídeos antiguos.</string>
+    <string name="photo_library_add_usage_description">Necesitamos guardar los vídeos que grabes en tu galería.</string>
 </resources>

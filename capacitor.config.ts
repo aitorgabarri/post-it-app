@@ -5,11 +5,21 @@ const config: CapacitorConfig = {
   appName: 'Post-it',
   webDir: 'out',
   server: {
-    // ✅ Quitamos la barra '/' del final para evitar errores de ruta
-    url: 'https://post-it-app-topaz.vercel.app', 
+    url: 'https://post-it-app-topaz.vercel.app',
     cleartext: true,
-    // 💡 Añadimos esto para que no intente cargar archivos locales si falla la red
     androidScheme: 'https'
+  },
+  // ✅ AÑADIMOS ESTO: Sin este bloque, las notificaciones locales no despiertan a la APK
+  plugins: {
+    LocalNotifications: {
+      smallIcon: "ic_stat_icon_config_sample",
+      iconColor: "#00d1ff",
+      sound: "beep.wav",
+    },
+    // También configuramos la cámara para que sea más agresiva
+    Camera: {
+      permissions: ["camera", "photos"]
+    }
   }
 };
 
