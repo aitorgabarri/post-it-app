@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase'; 
 import { useRouter } from 'next/router'; 
 import Link from 'next/link';
-import OneSignal from 'onesignal-cordova-plugin'; // ✅ Plugin de OneSignal
+// ✅ IMPORTANTE: Hemos quitado el import de OneSignal de aquí arriba para que Vercel no explote
 import { Camera } from '@capacitor/camera'; 
 import { SplashScreen } from '@capacitor/splash-screen';
 
@@ -10,36 +10,38 @@ export default function HomePage() {
   const [reminders, setReminders] = useState<any[]>([]);
   const [user, setUser] = useState<string | null>(null);
   const [showOptions, setShowOptions] = useState(false);
-  const [videoFull, setVideoFull] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
 
-  // 🔔 CONFIGURACIÓN ONESIGNAL: Pide permisos y registra al usuario
+  // 🔔 CONFIGURACIÓN ONESIGNAL (Carga Segura)
   const setupOneSignal = async () => {
     try {
-      // 1. Pedir permiso de cámara para que esté lista al grabar
+      // 1. Permisos de cámara
       await Camera.requestPermissions();
 
-      // 2. Solo inicializamos si estamos en el dispositivo móvil (APK)
+      // 2. Solo ejecutamos lógica nativa si estamos en el móvil (window.cordova existe)
       if (typeof window !== 'undefined' && (window as any).cordova) {
         
-        // Inicializar con tu ID real de OneSignal
+        // ✅ IMPORTACIÓN DINÁMICA: Esto es lo que arregla el error de Vercel
+        const OneSignal = (await import('onesignal-cordova-plugin')).default;
+
+        // Inicializar con tu ID
         OneSignal.initialize("f8e1e63e-151d-4f01-96ad-3d00c5f25ec8");
 
-        // ✅ VINCULACIÓN: Registramos el móvil con el nombre del usuario de Supabase
+        // Vincular con el nombre de usuario
         const userName = localStorage.getItem('userName');
         if (userName) {
           OneSignal.login(userName); 
-          console.log("Dispositivo vinculado al usuario:", userName);
+          console.log("OneSignal vinculado a:", userName);
         }
 
-        // Lanza el diálogo nativo de Android de "Permitir notificaciones"
+        // Lanzar cartel de permisos
         OneSignal.Notifications.requestPermission(true).then((accepted) => {
-          console.log("¿Notificaciones OneSignal aceptadas?: " + accepted);
+          console.log("¿Permiso notis aceptado?: " + accepted);
         });
       }
     } catch (e) {
-      console.log("Error al inicializar servicios nativos", e);
+      console.log("Error en servicios nativos:", e);
     }
   };
 
@@ -78,7 +80,7 @@ export default function HomePage() {
     const savedUser = localStorage.getItem('userName');
     
     if (isMounted) {
-      // ✅ LANZAMOS ONESIGNAL Y CÁMARA AQUÍ NADA MÁS ENTRAR
+      // ✅ Lanzamos la configuración nada más montar
       setupOneSignal();
 
       if (!savedUser) { 
@@ -112,12 +114,12 @@ export default function HomePage() {
             <div key={r.id} style={{ background: r.color || '#fffbe6', padding: '20px', borderRadius: '15px', position: 'relative', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                  <p style={{ fontSize: '10px', fontWeight: 'bold', margin: 0 }}>DE: {r.sender_name}</p>
-                 <button onClick={() => deletePostIt(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>🗑️</button>
+                 <button onClick={() => deletePostIt(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>🗑️</button>
               </div>
               {r.video_url?.startsWith('http') ? (
                 <video src={r.video_url} controls style={{ width: '100%', borderRadius: '10px' }} />
               ) : (
-                <p style={{ margin: 0, fontSize: '16px' }}>{r.video_url}</p>
+                <p style={{ margin: 0 }}>{r.video_url}</p>
               )}
             </div>
           ))
